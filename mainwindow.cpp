@@ -16,7 +16,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(&player, &QMediaPlayer::positionChanged, this, &MainWindow::on_positionChanged);
     connect(&player, &QMediaPlayer::durationChanged, this, &MainWindow::on_durationChanged);
     connect(&player, SIGNAL(mediaStatusChanged(QMediaPlayer::MediaStatus)), this, SLOT(onMediaStatusChanged(QMediaPlayer::MediaStatus)));
-
+    //promena za test commit
 }
 
 MainWindow::~MainWindow()
