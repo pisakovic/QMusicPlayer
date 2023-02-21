@@ -16,6 +16,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(&player, &QMediaPlayer::positionChanged, this, &MainWindow::on_positionChanged);
     connect(&player, &QMediaPlayer::durationChanged, this, &MainWindow::on_durationChanged);
     connect(&player, SIGNAL(mediaStatusChanged(QMediaPlayer::MediaStatus)), this, SLOT(onMediaStatusChanged(QMediaPlayer::MediaStatus)));
+    connect(&player, SIGNAL(playbackStateChanged(QMediaPlayer::PlaybackState)),this, SLOT(onPlaybackStateChanged(QMediaPlayer::PlaybackState)));
     //promena za test commit
 }
 
@@ -30,6 +31,18 @@ void MainWindow::on_volumeBar_sliderMoved(int position)
     audioOutput.setVolume(linearVolume);
 }
 
+void MainWindow::onPlaybackStateChanged(QMediaPlayer::PlaybackState state)
+{
+    if(state == QMediaPlayer::PlayingState)
+    {
+        ui->playBtn->setText("Pause");
+    }
+    else
+    {
+        ui->playBtn->setText("Play");
+    }
+}
+
 void MainWindow::on_playBtn_clicked()
 {
     if(player.playbackState() == QMediaPlayer::PausedState)
@@ -38,11 +51,21 @@ void MainWindow::on_playBtn_clicked()
         //qDebug()<<QString::number(curr_position);
         player.play();
     }
-    else if(player.mediaStatus() == QMediaPlayer::NoMedia)
+    else if(player.mediaStatus() == QMediaPlayer::NoMedia && playlist.mediaCount()==0)
     {
         QMessageBox messageBox;
-        messageBox.critical(0,"Error","Choose a track to play!");
+        messageBox.critical(0,"Error","Add a track to play!");
         messageBox.setFixedSize(500,200);
+    }
+    else if(player.mediaStatus() == QMediaPlayer::NoMedia && playlist.mediaCount()!=0)
+    {
+        player.setSource(playlist.media(0));
+        player.play();
+    }
+    else if(player.playbackState() == QMediaPlayer::PlayingState)
+    {
+        player.pause();
+        curr_position = player.position();
     }
     else
     {
@@ -65,8 +88,11 @@ void MainWindow::on_chooseFile_clicked()
         if(f.length() > 0)
         {
         playlist.insertMedia(ui->playlistWidget->count(),QUrl::fromLocalFile(f));
-        QFileInfo fi(f);
-        ui->playlistWidget->insertItem(ui->playlistWidget->count(),fi.fileName());
+        TagLib::MPEG::File file(f.toStdString().c_str());
+        TagLib::Tag *tag = file.tag();
+        QString artist = QString::fromStdString(tag->artist().toCString());
+        QString track = QString::fromStdString(tag->title().toCString());
+        ui->playlistWidget->insertItem(ui->playlistWidget->count(),artist + " - " + track);
         }
     }
 }
@@ -96,14 +122,6 @@ void MainWindow::on_volumeBar_valueChanged(int value)
 }
 
 
-void MainWindow::on_pauseBtn_clicked()
-{
-    player.pause();
-    curr_position = player.position();
-    qDebug()<<QString::number(curr_position);
-
-}
-
 void MainWindow::on_playlistWidget_itemDoubleClicked(QListWidgetItem *item)
 {
     player.stop();
@@ -125,6 +143,10 @@ void MainWindow::onMediaStatusChanged(QMediaPlayer::MediaStatus status)
 
         title = GetMetaDataName(&player);
         ui->mediaName->setText(title);
+    }
+    else if(status == QMediaPlayer::EndOfMedia)
+    {
+        on_nextBtn_clicked();
     }
 }
 
@@ -178,11 +200,15 @@ void MainWindow::on_nextBtn_clicked()
 {
     player.stop();
 
-    if((playlist.mediaCount() - 1) <= currMediaIndex)
+    if((playlist.mediaCount() - 1) <= currMediaIndex && ui->radioButton->isChecked())
     {
         player.setSource(playlist.media(0));
         currMediaIndex = 0;
         player.play();
+    }
+    else if((playlist.mediaCount() - 1) <= currMediaIndex && !(ui->radioButton->isChecked()))
+    {
+        player.stop();
     }
     else
     {
@@ -200,9 +226,7 @@ void MainWindow::on_prevBtn_clicked()
 
     if(currMediaIndex == 0)
     {
-        currMediaIndex = playlist.mediaCount()-1;
-        player.setSource(playlist.media(currMediaIndex));
-        player.play();
+        player.stop();
     }
     else
     {
@@ -216,17 +240,21 @@ void MainWindow::on_prevBtn_clicked()
 void MainWindow::on_shuffleBtn_clicked()
 {
     if(playlist.mediaCount() > 1){
-        ui->playlistWidget->clear();
+
         playlist.shuffle();
-        //optimizuj bolje siso
-        for(auto &f: playlist)
+        ui->playlistWidget->clear();
+        for(auto f: playlist)
         {
-            QFileInfo fi(f.fileName());
-            ui->playlistWidget->insertItem(ui->playlistWidget->count(),fi.fileName());
+
+            f.setScheme("");
+            TagLib::MPEG::File file(f.toString().toStdString().c_str());
+            TagLib::Tag *tag = file.tag();
+            QString artist = QString::fromStdString(tag->artist().toCString());
+            QString track = QString::fromStdString(tag->title().toCString());
+            ui->playlistWidget->insertItem(ui->playlistWidget->count(),artist + " - " + track);
         }
     }
 }
-
 
 
 void MainWindow::on_pushButton_clicked()
@@ -239,4 +267,7 @@ void MainWindow::on_pushButton_clicked()
         delete ui->playlistWidget->takeItem(ui->playlistWidget->row(item));
     }
 }
+
+
+
 

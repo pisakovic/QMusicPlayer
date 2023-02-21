@@ -53,13 +53,6 @@
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="pauseBtn">
-            <property name="text">
-             <string>Pause</string>
-            </property>
-           </widget>
-          </item>
-          <item>
            <widget class="QPushButton" name="stopBtn">
             <property name="text">
              <string>Stop</string>
@@ -201,7 +194,7 @@
         </rect>
        </property>
        <property name="selectionMode">
-        <enum>QAbstractItemView::MultiSelection</enum>
+        <enum>QAbstractItemView::ExtendedSelection</enum>
        </property>
       </widget>
       <widget class="QPushButton" name="shuffleBtn">
@@ -214,7 +207,10 @@
         </rect>
        </property>
        <property name="text">
-        <string>Shuffle</string>
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset theme="media-playlist-shuffle"/>
        </property>
       </widget>
       <widget class="QPushButton" name="pushButton">
@@ -227,7 +223,10 @@
         </rect>
        </property>
        <property name="text">
-        <string>Remove</string>
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset theme="media-eject"/>
        </property>
       </widget>
       <widget class="QPushButton" name="prevBtn">
@@ -240,7 +239,10 @@
         </rect>
        </property>
        <property name="text">
-        <string>&lt;&lt;</string>
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset theme="media-skip-backward"/>
        </property>
       </widget>
       <widget class="QPushButton" name="nextBtn">
@@ -253,7 +255,26 @@
         </rect>
        </property>
        <property name="text">
-        <string>&gt;&gt;</string>
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset theme="media-skip-forward"/>
+       </property>
+      </widget>
+      <widget class="QRadioButton" name="radioButton">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>240</y>
+         <width>41</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset theme="media-playlist-repeat"/>
        </property>
       </widget>
      </widget>
