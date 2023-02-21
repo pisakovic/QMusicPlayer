@@ -16,7 +16,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(&player, &QMediaPlayer::positionChanged, this, &MainWindow::on_positionChanged);
     connect(&player, &QMediaPlayer::durationChanged, this, &MainWindow::on_durationChanged);
     connect(&player, SIGNAL(mediaStatusChanged(QMediaPlayer::MediaStatus)), this, SLOT(onMediaStatusChanged(QMediaPlayer::MediaStatus)));
-    connect(&player, SIGNAL(playbackStateChanged(QMediaPlayer::PlaybackState)),this, SLOT(onPlaybackStateChanged(QMediaPlayer::PlaybackState)));
+    connect(&player, SIGNAL(playbackStateChanged(QMediaPlayer::PlaybackState)), this, SLOT(onPlaybackStateChanged(QMediaPlayer::PlaybackState)));
     //promena za test commit
 }
 
@@ -140,9 +140,10 @@ void MainWindow::onMediaStatusChanged(QMediaPlayer::MediaStatus status)
         pixmp = QPixmap::fromImage(GetMetaDataImg(&player));
         pixmp = pixmp.scaled(ui->imgLabel->size(),Qt::KeepAspectRatio);
         ui->imgLabel->setPixmap(pixmp);
-
         title = GetMetaDataName(&player);
         ui->mediaName->setText(title);
+
+
     }
     else if(status == QMediaPlayer::EndOfMedia)
     {
@@ -267,7 +268,6 @@ void MainWindow::on_pushButton_clicked()
         delete ui->playlistWidget->takeItem(ui->playlistWidget->row(item));
     }
 }
-
 
 
 
