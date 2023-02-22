@@ -8,7 +8,7 @@ MainWindow::MainWindow(QWidget *parent)
     , audioOutput(QAudioOutput())
     , currMediaIndex(0)
     , playlist(QPlaylist())
-    , re("\\d\\. ")
+    , re("\\d+\\. ")
 {
     ui->setupUi(this);
 
