@@ -8,6 +8,7 @@ MainWindow::MainWindow(QWidget *parent)
     , audioOutput(QAudioOutput())
     , currMediaIndex(0)
     , playlist(QPlaylist())
+    , re("\\d\\. ")
 {
     ui->setupUi(this);
 
@@ -33,14 +34,22 @@ void MainWindow::on_volumeBar_sliderMoved(int position)
 
 void MainWindow::onPlaybackStateChanged(QMediaPlayer::PlaybackState state)
 {
+    int prevMediaIndex = currMediaIndex;
+    QString row = ui->playlistWidget->item(currMediaIndex)->text();
+    row.append(QString::fromUtf8("           \u25B6"));
+
     if(state == QMediaPlayer::PlayingState)
     {
         ui->playBtn->setText("Pause");
+        ui->playlistWidget->item(currMediaIndex)->setText(row);
     }
     else
     {
+        ui->playlistWidget->item(prevMediaIndex)->setText(row.replace("           \u25B6",""));
         ui->playBtn->setText("Play");
     }
+
+
 }
 
 void MainWindow::on_playBtn_clicked()
@@ -92,7 +101,8 @@ void MainWindow::on_chooseFile_clicked()
         TagLib::Tag *tag = file.tag();
         QString artist = QString::fromStdString(tag->artist().toCString());
         QString track = QString::fromStdString(tag->title().toCString());
-        ui->playlistWidget->insertItem(ui->playlistWidget->count(),artist + " - " + track);
+        QString num = QString::number(ui->playlistWidget->count()+1);
+        ui->playlistWidget->insertItem(ui->playlistWidget->count(),num + ". " + artist + " - " + track);
         }
     }
 }
@@ -142,13 +152,13 @@ void MainWindow::onMediaStatusChanged(QMediaPlayer::MediaStatus status)
         ui->imgLabel->setPixmap(pixmp);
         title = GetMetaDataName(&player);
         ui->mediaName->setText(title);
-
-
     }
     else if(status == QMediaPlayer::EndOfMedia)
     {
         on_nextBtn_clicked();
     }
+
+
 }
 
 QImage MainWindow::GetMetaDataImg(QMediaPlayer *player)
@@ -240,6 +250,10 @@ void MainWindow::on_prevBtn_clicked()
 
 void MainWindow::on_shuffleBtn_clicked()
 {
+    auto item = ui->playlistWidget->item(currMediaIndex);
+    item->setText(item->text().replace("           \u25B6","").replace(re,""));
+    QString itemTxt = item->text();
+
     if(playlist.mediaCount() > 1){
 
         playlist.shuffle();
@@ -252,9 +266,18 @@ void MainWindow::on_shuffleBtn_clicked()
             TagLib::Tag *tag = file.tag();
             QString artist = QString::fromStdString(tag->artist().toCString());
             QString track = QString::fromStdString(tag->title().toCString());
-            ui->playlistWidget->insertItem(ui->playlistWidget->count(),artist + " - " + track);
+            QString num = QString::number(ui->playlistWidget->count()+1);
+            QString fullname = artist + " - " + track;
+
+            if(fullname == itemTxt)
+            {
+               currMediaIndex = ui->playlistWidget->count();
+            }
+
+            ui->playlistWidget->insertItem(ui->playlistWidget->count(),num + ". " + fullname);
         }
     }
+    emit player.playbackStateChanged(QMediaPlayer::PlayingState);
 }
 
 
@@ -268,6 +291,7 @@ void MainWindow::on_pushButton_clicked()
         delete ui->playlistWidget->takeItem(ui->playlistWidget->row(item));
     }
 }
+
 
 
 

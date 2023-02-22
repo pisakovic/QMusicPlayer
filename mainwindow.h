@@ -50,7 +50,7 @@ private slots:
     void on_shuffleBtn_clicked();
     void on_pushButton_clicked();
     void onPlaybackStateChanged(QMediaPlayer::PlaybackState);
-    //void keyPressEvent(QKeyEvent *ev);
+
 
 private:
     Ui::MainWindow *ui;
@@ -60,5 +60,7 @@ private:
     int currMediaIndex;
     int curr_position;
     QPlaylist playlist;
+    QRegularExpression re;
+
 };
 #endif // MAINWINDOW_H
