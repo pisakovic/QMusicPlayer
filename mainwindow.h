@@ -38,11 +38,11 @@ private slots:
     void on_progressBar_sliderMoved(int position);
     void on_positionChanged(int position);
     void on_durationChanged(int position);
-    QString ms_to_time(long long duration);
+    QString msToTime(long long duration);
     void on_volumeBar_valueChanged(int value);
     void onMediaStatusChanged(QMediaPlayer::MediaStatus status);
-    QImage GetMetaDataImg(QMediaPlayer *player);
-    QString GetMetaDataName(QMediaPlayer *player);
+    QImage GetMetaDataImg(QMediaPlayer &player);
+    QString GetMetaDataName(QMediaPlayer &player);
     void on_chooseFile_clicked();
     void on_playlistWidget_itemDoubleClicked(QListWidgetItem *item);
     void on_nextBtn_clicked();
@@ -60,7 +60,7 @@ private:
     int currMediaIndex;
     int curr_position;
     QPlaylist playlist;
-    QRegularExpression re;
+
 
 };
 #endif // MAINWINDOW_H

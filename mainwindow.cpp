@@ -8,7 +8,7 @@ MainWindow::MainWindow(QWidget *parent)
     , audioOutput(QAudioOutput())
     , currMediaIndex(0)
     , playlist(QPlaylist())
-    , re("\\d+\\. ")
+
 {
     ui->setupUi(this);
 
@@ -18,7 +18,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(&player, &QMediaPlayer::durationChanged, this, &MainWindow::on_durationChanged);
     connect(&player, SIGNAL(mediaStatusChanged(QMediaPlayer::MediaStatus)), this, SLOT(onMediaStatusChanged(QMediaPlayer::MediaStatus)));
     connect(&player, SIGNAL(playbackStateChanged(QMediaPlayer::PlaybackState)), this, SLOT(onPlaybackStateChanged(QMediaPlayer::PlaybackState)));
-    //promena za test commit
+
 }
 
 MainWindow::~MainWindow()
@@ -91,6 +91,7 @@ void MainWindow::on_stopBtn_clicked()
 void MainWindow::on_chooseFile_clicked()
 {
     QStringList fileName = QFileDialog::getOpenFileNames(this, tr("Open File"),"/home/petar/Music",tr("Mp3 Files (*.mp3)"));
+    //Problem with new Win10 update
 
     for(auto &f: fileName)
     {
@@ -115,14 +116,14 @@ void MainWindow::on_progressBar_sliderMoved(int position)
 void MainWindow::on_positionChanged(int position)
 {
     ui->progressBar->setValue(position);
-    QString time_curr = ms_to_time(player.position());
+    QString time_curr = msToTime(player.position());
     ui->progLabel->setText(time_curr);
 }
 
 void MainWindow::on_durationChanged(int position)
 {
     ui->progressBar->setMaximum(position);
-    QString time = ms_to_time(player.duration());
+    QString time = msToTime(player.duration());
     ui->progMaxLabel->setText(time);
 }
 
@@ -142,15 +143,15 @@ void MainWindow::on_playlistWidget_itemDoubleClicked(QListWidgetItem *item)
 
 void MainWindow::onMediaStatusChanged(QMediaPlayer::MediaStatus status)
 {
-    QPixmap pixmp = *new QPixmap();
-    QString title = *new QString();
+    QPixmap pixmp;
+    QString title;
 
     if (status == QMediaPlayer::BufferedMedia){
 
-        pixmp = QPixmap::fromImage(GetMetaDataImg(&player));
+        pixmp = QPixmap::fromImage(GetMetaDataImg(player));
         pixmp = pixmp.scaled(ui->imgLabel->size(),Qt::KeepAspectRatio);
         ui->imgLabel->setPixmap(pixmp);
-        title = GetMetaDataName(&player);
+        title = GetMetaDataName(player);
         ui->mediaName->setText(title);
     }
     else if(status == QMediaPlayer::EndOfMedia)
@@ -161,31 +162,31 @@ void MainWindow::onMediaStatusChanged(QMediaPlayer::MediaStatus status)
 
 }
 
-QImage MainWindow::GetMetaDataImg(QMediaPlayer *player)
+QImage MainWindow::GetMetaDataImg(QMediaPlayer &player)
 {
 
-    QMediaMetaData pMetaData = player->metaData();
-    QVariant var_coverArt = pMetaData[QMediaMetaData::CoverArtImage];
-    QImage coverArt = var_coverArt.value<QImage>();
+    QMediaMetaData pMetaData = player.metaData();
+    QVariant varCoverArt = pMetaData[QMediaMetaData::CoverArtImage];
+    QImage coverArt = varCoverArt.value<QImage>();
     return coverArt;
 
 }
 
-QString MainWindow::GetMetaDataName(QMediaPlayer *player)
+QString MainWindow::GetMetaDataName(QMediaPlayer &player)
 {
 
-    QMediaMetaData pMetaData = player->metaData();
-    QVariant var_title = pMetaData[QMediaMetaData::Title];
-    QVariant var_artist = pMetaData[QMediaMetaData::AlbumArtist];
-    QString track_title = var_artist.value<QString>() + " - " + var_title.value<QString>();
-    return track_title;
+    QMediaMetaData pMetaData = player.metaData();
+    QVariant varTitle = pMetaData[QMediaMetaData::Title];
+    QVariant varArtist = pMetaData[QMediaMetaData::AlbumArtist];
+    QString trackTitle = varArtist.value<QString>() + " - " + varTitle.value<QString>();
+    return trackTitle;
 
 }
 
-QString MainWindow::ms_to_time(long long duration)
+QString MainWindow::msToTime(long long duration)
 {
-    QString min = *new QString();
-    QString sec = *new QString();
+    QString min;
+    QString sec;
 
     long m = duration / 60000;
     duration = duration - 60000*m;
@@ -250,6 +251,7 @@ void MainWindow::on_prevBtn_clicked()
 
 void MainWindow::on_shuffleBtn_clicked()
 {
+    static const QRegularExpression re("\\d+\\. ");
     auto item = ui->playlistWidget->item(currMediaIndex);
     item->setText(item->text().replace("           \u25B6","").replace(re,""));
     QString itemTxt = item->text();
@@ -280,14 +282,13 @@ void MainWindow::on_shuffleBtn_clicked()
     emit player.playbackStateChanged(QMediaPlayer::PlayingState);
 }
 
-
+//Remove button
 void MainWindow::on_pushButton_clicked()
 {
     auto selectedItems = ui->playlistWidget->selectedItems();
     for(auto &item: selectedItems)
     {
         playlist.removeMedia(ui->playlistWidget->row(item));
-        //uzima se i brise item iz widgeta
         delete ui->playlistWidget->takeItem(ui->playlistWidget->row(item));
     }
 }
